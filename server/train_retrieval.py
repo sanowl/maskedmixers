@@ -6,9 +6,9 @@ from transformers import AutoTokenizer
 from datasets import load_dataset
 import json
 import numpy as np
-import random
 from safetensors.torch import safe_open
 from tqdm import tqdm
+import secrets
 
 def FeedForward(dim, expansion_factor=4):
 	inner_dim = int(dim * expansion_factor)
@@ -276,11 +276,11 @@ def generate_retrieval_dataset(query_embeddings, target_embeddings, n_context, m
 			input = torch.zeros((n_context, query_embeddings[0].shape[1]))
 			input[0] = query
 			exclusive_target = target_embeddings[:i] + target_embeddings[i+1:]
-			random_insert = random.sample(exclusive_target, k=n_context-1)
+			random_insert = secrets.SystemRandom().sample(exclusive_target, k=n_context-1)
 			random_insert = torch.stack(random_insert, dim=0).reshape(input[1:].shape)
 			input[1:] = random_insert
 
-			target_index = random.randint(1, n_context-1)
+			target_index = secrets.SystemRandom().randint(1, n_context-1)
 			matching_target = target_embeddings[i]
 			input[target_index] = matching_target
 			labels = torch.tensor(target_index-1, dtype=torch.long)
@@ -336,7 +336,7 @@ class RetrievalDataset(torch.utils.data.Dataset):
 		self.prob_weights[idx] = 1
 		input[1:] = self.target_embeddings[indices]
 
-		target_index = random.randint(1, self.n_context-1) # random index to put target embedding
+		target_index = secrets.SystemRandom().randint(1, self.n_context-1) # random index to put target embedding
 		matching_target = self.target_embeddings[idx] # target the query matches
 		input[target_index] = matching_target
 		labels = torch.tensor(target_index-1, dtype=torch.long) # one-element label for cross-entropy loss
@@ -364,7 +364,7 @@ class RetrievalIndexDataset(torch.utils.data.Dataset):
 		if self.n_context + self.n_context*idx >= self.length:
 			np.random.shuffle(self.indices)
 		input = self.indices[n_context*idx: self.n_context*idx + self.n_context]
-		target_index = random.randint(1, self.n_context-1) # random position to duplicate query index (at position 0)
+		target_index = secrets.SystemRandom().randint(1, self.n_context-1) # random position to duplicate query index (at position 0)
 		input[target_index] = input[0]
 		input = torch.tensor(input)
 		labels = torch.tensor(target_index-1, dtype=torch.long) # one-element label for cross-entropy loss
