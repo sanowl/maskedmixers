@@ -5,9 +5,9 @@ import torch.nn as nn
 from transformers import AutoTokenizer
 from datasets import load_dataset
 import json
-import random
 from transformers import LlamaConfig
 from safetensors.torch import safe_open
+import secrets
 
 
 class TransformerBlock(nn.Module):
@@ -128,7 +128,7 @@ class RetrievalDataset(torch.utils.data.Dataset):
 		self.prob_weights[idx] = 1
 		input[1:] = self.target_embeddings[indices]
 
-		target_index = random.randint(1, self.n_context-1) # random index to put target embedding
+		target_index = secrets.SystemRandom().randint(1, self.n_context-1) # random index to put target embedding
 		matching_target = self.target_embeddings[idx] # target the query matches
 		input[target_index] = matching_target
 		labels = torch.tensor(target_index-1, dtype=torch.long) # one-element label for cross-entropy loss
