@@ -1,4 +1,5 @@
 import os
+import secrets
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
@@ -11,7 +12,6 @@ import torch.nn as nn
 from datasets import load_dataset
 from safetensors.torch import load_model, safe_open
 import json
-import random
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
@@ -221,11 +221,11 @@ def generate_retrieval_dataset(query_embeddings, target_embeddings, n_context, m
 			input = torch.zeros((n_context, query_embeddings[0].shape[1]))
 			input[0] = query
 			exclusive_target = target_embeddings[:i] + target_embeddings[i+1:]
-			random_insert = random.sample(exclusive_target, k=n_context-1)
+			random_insert = secrets.SystemRandom().sample(exclusive_target, k=n_context-1)
 			random_insert = torch.stack(random_insert, dim=0).reshape(input[1:].shape)
 			input[1:] = random_insert
 
-			target_index = random.randint(1, n_context-1)
+			target_index = secrets.SystemRandom().randint(1, n_context-1)
 			matching_target = target_embeddings[i]
 			input[target_index] = matching_target
 			labels = torch.tensor(target_index-1, dtype=torch.long)
@@ -276,7 +276,7 @@ class RetrievalDataset(torch.utils.data.Dataset):
 		self.prob_weights[idx] = 1
 		input[1:] = self.target_embeddings[indices]
 
-		target_index = random.randint(1, self.n_context-1) # random index to put target embedding
+		target_index = secrets.SystemRandom().randint(1, self.n_context-1) # random index to put target embedding
 		matching_target = self.target_embeddings[idx] # target the query matches
 		input[target_index] = matching_target
 		labels = torch.tensor(target_index-1, dtype=torch.long) # one-element label for cross-entropy loss
