@@ -1,4 +1,5 @@
 import os
+import secrets
 
 # run on only one GPU
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -6,9 +7,7 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 from transformers import AutoTokenizer, AutoTokenizer
 import torch
-import random
 from torch import nn
-import random
 from prettytable import PrettyTable
 from datasets import load_dataset
 from functools import partial 
@@ -19,7 +18,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print (device)
 
 manualSeed = 1
-random.seed(manualSeed)
+secrets.SystemRandom().seed(manualSeed)
 torch.manual_seed(manualSeed)
 
 def FeedForward(dim, expansion_factor=4):

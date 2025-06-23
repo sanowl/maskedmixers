@@ -1,4 +1,5 @@
 import os
+import secrets
 
 # run on only one GPU if more than one are present
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
@@ -7,14 +8,13 @@ os.environ["CUDA_VISIBLE_DEVICES"]="0"
 from transformers import AutoTokenizer
 from transformers import LlamaConfig, LlamaForCausalLM
 import torch
-import random
 from torch import nn
 from datasets import load_dataset
 from safetensors.torch import load_model
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 manualSeed = 1
-random.seed(manualSeed)
+secrets.SystemRandom().seed(manualSeed)
 torch.manual_seed(manualSeed)
 
 def octave(single_input, target_output, iterations, learning_rates):

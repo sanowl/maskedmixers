@@ -1,7 +1,7 @@
 import torch
-import random
 import time
 from safetensors.torch import safe_open
+import secrets
 
 class RetrievalDataset(torch.utils.data.Dataset):
 
@@ -20,7 +20,7 @@ class RetrievalDataset(torch.utils.data.Dataset):
 		random_insert = self.target_embeddings[indices].reshape(input[1:].shape)
 		input[1:] = random_insert
 
-		target_index = random.randint(1, self.n_context-1) # random index to put target embedding
+		target_index = secrets.SystemRandom().randint(1, self.n_context-1) # random index to put target embedding
 		matching_target = self.target_embeddings[idx] # target the query matches
 		input[target_index] = matching_target
 		labels = torch.tensor(target_index-1, dtype=torch.long) # one-element label for cross-entropy loss
